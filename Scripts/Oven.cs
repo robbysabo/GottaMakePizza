@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Oven : MonoBehaviour
 {
-    public Game theParent;
+    public Game game;
     public bool canClickDoors = true;
     public bool isCooking = false;
     public bool isClickable = true;
@@ -16,7 +16,7 @@ public class Oven : MonoBehaviour
     {
         if (isClickable)
         {
-            theParent.OvenClicked(name);
+            game.OvenClicked(name);
         }
     }
 
@@ -24,13 +24,13 @@ public class Oven : MonoBehaviour
     {
         if (isClickable)
         {
-            theParent.ShowOvenToolTip(name);
+            game.ShowOvenToolTip(name);
         }
     }
 
     private void OnMouseExit()
     {
-        theParent.HideTooltip();
+        game.HideTooltip();
     }
 
     public void ChangeSpriteOpen(bool boolValue)

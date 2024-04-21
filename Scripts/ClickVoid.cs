@@ -4,10 +4,10 @@ using UnityEngine;
 
 public class ClickVoid : MonoBehaviour
 {
-    public Game theParent;
+    public Game game;
 
     private void OnMouseDown()
     {
-        theParent.VoidClicked();
+        game.VoidClicked();
     }
 }

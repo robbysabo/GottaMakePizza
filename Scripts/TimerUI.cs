@@ -43,7 +43,7 @@ public class TimerUI : BaseTimer
 
         if (timeLeft <= 0)
         {
-            theParent.StartCoroutine(callTimeoutMethodName, name);
+            game.StartCoroutine(callTimeoutMethodName, name);
         }
     }
 

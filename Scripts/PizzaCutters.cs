@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class PizzaCutters : MonoBehaviour
 {
-    public Game theParent;
+    public Game game;
     public bool isSelected = false;
     public bool isClickable = true;
 
@@ -15,7 +15,7 @@ public class PizzaCutters : MonoBehaviour
     {
         if (isClickable)
         {
-            theParent.PizzaCutterClicked();
+            game.PizzaCutterClicked();
         }
     }
 
@@ -29,13 +29,13 @@ public class PizzaCutters : MonoBehaviour
                 msg = "Unselect Pizza Cutter";
             }
 
-            theParent.ShowTooltip(msg);
+            game.ShowTooltip(msg);
         }
     }
 
     private void OnMouseExit()
     {
-        theParent.HideTooltip();
+        game.HideTooltip();
     }
 
     public void UpdateSprite()

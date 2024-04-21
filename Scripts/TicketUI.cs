@@ -11,7 +11,7 @@ using UnityEngine.UI;
 
 public class TicketUI : MonoBehaviour, IPointerClickHandler
 {
-    public Game theParent;
+    public Game game;
 
     public GameObject Title;
     public GameObject Checkbox1;
@@ -38,7 +38,7 @@ public class TicketUI : MonoBehaviour, IPointerClickHandler
 
     public void OnPointerClick(PointerEventData pointerEventData)
     {
-        theParent.HideTicketUI();
+        game.HideTicketUI();
     }
 
     void Update()

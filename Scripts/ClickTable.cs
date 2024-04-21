@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class ClickTable : MonoBehaviour
 {
-    public Game theParent;
+    public Game game;
     public bool isClickable = true;
     public Sprite addButton;
     public Sprite pizzaShadow;
@@ -20,22 +20,22 @@ public class ClickTable : MonoBehaviour
     {
         if (isClickable)
         {
-            theParent.TableClicked();
+            game.TableClicked();
         }
     }
 
-    /*private void OnMouseOver()
+    private void OnMouseOver()
     {
         if (isClickable)
         {
-            theParent.ShowTableTooltip();
+            game.ShowTableTooltip();
         }
     }
 
     private void OnMouseExit()
     {
-        theParent.HideTooltip();
-    }*/
+        game.HideTooltip();
+    }
 
     public void SetClickable(bool boolValue)
     {

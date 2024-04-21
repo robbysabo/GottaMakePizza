@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class FoodContainer : MonoBehaviour
 {
-    public Game theParent;
+    public Game game;
     public bool isSelected = false;
     public string foodName = "";
     public bool isClickable = true;
@@ -16,7 +16,7 @@ public class FoodContainer : MonoBehaviour
     {
         if (isClickable)
         {
-            theParent.FoodClicked(foodName);
+            game.FoodClicked(foodName);
         }
     }
 
@@ -29,13 +29,13 @@ public class FoodContainer : MonoBehaviour
             {
                 msg = "Unselect " + foodName;
             }
-            theParent.ShowTooltip(msg);
+            game.ShowTooltip(msg);
         }
     }
 
     private void OnMouseExit()
     {
-        theParent.HideTooltip();
+        game.HideTooltip();
     }
 
     public void UpdateSprite()

@@ -5,7 +5,7 @@ using UnityEngine;
 public class BaseTimer : MonoBehaviour
 {
     [Header("For Parent")]
-    public Game theParent;
+    public Game game;
     public float timeLeft = 10f;
     public float maxTime = 10f;
     public string callTimeoutMethodName;
@@ -29,7 +29,7 @@ public class BaseTimer : MonoBehaviour
 
         if (timeLeft <= 0f)
         {
-            theParent.StartCoroutine(callTimeoutMethodName, name);
+            game.StartCoroutine(callTimeoutMethodName, name);
             Destroy(gameObject);
         }
     }

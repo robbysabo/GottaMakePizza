@@ -5,28 +5,28 @@ using UnityEngine.UIElements;
 
 public class TrashCan : MonoBehaviour
 {
-    public Game theParent;
+    public Game game;
     public bool isClickable = true;
     private void OnMouseDown()
     {
         if (isClickable)
         {
-            theParent.TrashCanClicked();
+            game.TrashCanClicked();
         }
     }
 
-    /*private void OnMouseOver()
+    private void OnMouseOver()
     {
         if (isClickable)
         {
-            theParent.ShowTooltip("Trash");
+            game.ShowTooltipTrash();
         }
     }
 
     private void OnMouseExit()
     {
-        theParent.HideTooltip();
-    }*/
+        game.HideTooltip();
+    }
 
     public void SetClickable(bool boolValue)
     {

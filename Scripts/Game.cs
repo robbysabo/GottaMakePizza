@@ -1,10 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Net.Sockets;
+using System.Linq;
+using System.Linq.Expressions;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.UIElements;
+using UnityEngine.SceneManagement;
 
 public class Game : MonoBehaviour
 {
@@ -14,15 +15,21 @@ public class Game : MonoBehaviour
     public GameObject TimerUIObj;
     public GameObject TicketObj;
     public GameObject TicketUIObj;
-    //public GameObject UpdateMoneyTextObj;
-    //public GameObject UpdateRatingsTextObj;
-    //public GameObject MoneyText;
-    //public GameObject RatingsText;
+    public GameObject UpdateMoneyTextObj;
+    public GameObject UpdateRatingsTextObj;
+    public GameObject MoneyText;
+    public GameObject RatingsText;
     public GameObject GameOverObj;
     public GameObject BaseTimerObj;
     public GameObject TooltipObj;
     public GameObject TooltipTextObj;
-    //public GameObject ReviewPanelObj;
+    public GameObject OptionMenu;
+    public AudioSource bgmSource;
+    public AudioSource sfxSource;
+    public AudioSource ambienceSource;
+    public AudioSource bellSource;
+    public TextMeshProUGUI pizzaMadeText;
+    public AudioSource warningSource;
 
     // game play vars
     [Header("Game Play Vars")]
@@ -31,14 +38,23 @@ public class Game : MonoBehaviour
     public float money = 0f;
     public const float PIZZA_PRICE = 10f;
     public float ratings = 2.5f;
-    public ArrayList reviewRatings = new ArrayList { 2.5f, 2.5f, 2.5f };
-    public const int MAX_AMOUNT_RATINGS = 8;
+    public ArrayList reviewRatings = new ArrayList { 2.5f, 2.5f, 2.5f, 2.5f, 2.5f };
+    public const int MAX_AMOUNT_RATINGS = 5;
     public float ticketRatings = 5.0f;
     public const int MAX_TOPPING_MULTIPLIER = 2;
     public ArrayList ticketTimerEnded = new ArrayList();
-    public ArrayList ticketFailed = new ArrayList();
     public string oven1Pizza = "";
     public string oven2Pizza = "";
+
+    [Header("Audio Clips")]
+    public AudioClip bgm1;
+    public AudioClip bgm2;
+    public AudioClip toppingPlacedClip;
+    public AudioClip saucePlacedClip;
+    public AudioClip selectedClip;
+    public AudioClip closedClip;
+    public AudioClip trashClip;
+    public AudioClip gameoverClip;
 
     private Main mainScript;
     private GameObject GameContainer;
@@ -47,11 +63,17 @@ public class Game : MonoBehaviour
     private PizzaCutters pizzaCutters;
     private ClickTable clickTable;
 
-    private float maxTicketSpawnWaitTime = 32f;
+    private float maxTicketSpawnWaitTime = 20f;
     private float minTicketSpawnWaitTime = 7f;
     private bool isTooltipOn = false;
     private Vector3 tooltipOffset = new Vector3(15, -15, 0);
-    private ArrayList customerReview = new ArrayList();
+
+    private float currentSecondsToMinusRating = 0f;
+    private float secondsToMinusRating = 3f;
+
+    private TextMeshProUGUI ratingsTextComponent;
+
+    private bool isPaused = false;
 
 
     // pizza vars
@@ -99,21 +121,40 @@ public class Game : MonoBehaviour
 
     public void Setup()
     {
+        mainScript = GameObject.Find("main").GetComponent<Main>();
         GameContainer = transform.Find("Game").gameObject;
         clickTable = GameContainer.transform.Find("ClickTable").GetComponent<ClickTable>();
         pizzaCutters = GameContainer.transform.Find("PizzaCutter").GetComponent<PizzaCutters>();
         canvas = transform.Find("Canvas").gameObject;
         tooltipCanvas = transform.Find("Canvas2").gameObject;
-        mainScript = GameObject.Find("main").GetComponent<Main>();
+        ratingsTextComponent = RatingsText.GetComponent<TextMeshProUGUI>();
+
         mainScript.ResetPizzaValues();
         TooltipObj.SetActive(false);
         CreateTicketPosition();
         StartRandomTicketSpawning();
-        //UpdateMoneyUI();
-        //UpdateRatingsUI();
+        UpdateMoneyUI();
+        UpdateRatingsUI();
+        SetupAudio();
+
 
         // Dark to clear
         Instantiate(DarkToClear, canvas.transform);
+    }
+
+    private void SetupAudio()
+    {
+        float maxVolume = mainScript.maxVolume;
+        float bgmValue = mainScript.bgmVolume;
+        float sfxValue = mainScript.sfxVolume;
+        float bgmVolume = Mathf.Lerp(0f, maxVolume, bgmValue);
+        float sfxVolume = Mathf.Lerp(0f, maxVolume, sfxValue);
+
+        bgmSource.volume = bgmVolume;
+        sfxSource.volume = sfxVolume;
+        ambienceSource.volume = sfxVolume;
+        bellSource.volume = sfxVolume;
+        warningSource.volume = sfxVolume;
     }
 
     private void StartRandomTicketSpawning()
@@ -121,22 +162,22 @@ public class Game : MonoBehaviour
         GameObject ticketSpawnTimer = Instantiate(BaseTimerObj);
         ticketSpawnTimer.name = "ticketSpawnTimer";
         BaseTimer baseTimer = ticketSpawnTimer.GetComponent<BaseTimer>();
-        baseTimer.theParent = this;
+        baseTimer.game = this;
         baseTimer.callTimeoutMethodName = "CreateTicketSpawn";
         baseTimer.maxTime = 5f;
         baseTimer.timeLeft = 5f;
         baseTimer.StartTimer();
     }
 
-    public void CreateTicketSpawn(string theName)
+    public void CreateTicketSpawn()
     {
         Quaternion rot = new Quaternion(0f, 0f, 0f, 0f);
         GameObject _ticket = Instantiate(TicketObj, ticketTimerPos, rot, GameContainer.transform);
         Ticket ticketScript = _ticket.GetComponent<Ticket>();
         ticketScript.maxRNG = maxCustomTicketRNG; // Adjust based on every minute, add more
-        ticketScript.theParent = this;
+        ticketScript.game = this;
         ticketScript.StartMakingTicket();
-        CreateTicketTimer(_ticket.name, GreenTimer, YellowTimer, "TicketTimerTimeOut");
+        CreateTicketTimer(_ticket.name, GreenTimer, RedTimer, "TicketTimerTimeOut");
         tickets.Add(new Dictionary<string, ArrayList> { { _ticket.name, ticketScript.ticketOrder } });
         UpdateTicketsOnTable();
 
@@ -144,11 +185,21 @@ public class Game : MonoBehaviour
         GameObject ticketSpawnTimer = Instantiate(BaseTimerObj);
         ticketSpawnTimer.name = "ticketSpawnTimer";
         BaseTimer baseTimer = ticketSpawnTimer.GetComponent<BaseTimer>();
-        baseTimer.theParent = this;
+        baseTimer.game = this;
         baseTimer.callTimeoutMethodName = "CreateTicketSpawn";
         baseTimer.maxTime = rngTime;
         baseTimer.timeLeft = rngTime;
         baseTimer.StartTimer();
+    }
+
+    public void TicketTimerTimeOut(string theName)
+    {
+        GameObject theTicketTimer = canvas.transform.Find(theName).gameObject;
+        bool isInTicketTimerEnded = ticketTimerEnded.Contains(theName);
+        if (!isInTicketTimerEnded)
+        {
+            ticketTimerEnded.Add(theName);
+        }
     }
 
     private void UpdateTicketsOnTable()
@@ -175,7 +226,7 @@ public class Game : MonoBehaviour
     {
         GameObject newTimer = Instantiate(TimerUIObj, canvas.transform);
         TimerUI timerScript = newTimer.GetComponent<TimerUI>();
-        timerScript.theParent = this;
+        timerScript.game = this;
         newTimer.name = ticketName + "-timer";
         timerScript.callTimeoutMethodName = timeOutMethodName;
         timerScript.SetPositionAndSize(ticketTimerPos, ticketTimerSize);
@@ -186,7 +237,7 @@ public class Game : MonoBehaviour
 
 
 
-    private void FixedUpdate()
+    private void Update()
     {
         BaseGameUpdate();
     }
@@ -205,6 +256,63 @@ public class Game : MonoBehaviour
         }
 
         CheckClickTableState();
+        CheckBGM();
+        MinusRatings();
+    }
+
+    private void MinusRatings()
+    {
+        if (isPaused)
+        {
+            return;
+        }
+        currentSecondsToMinusRating += Time.deltaTime;
+
+        if (currentSecondsToMinusRating >= secondsToMinusRating)
+        {
+            ArrayList newReviewRatings = new ArrayList();
+            float addAllRatings = 0.0f;
+
+            foreach (var rr in reviewRatings)
+            {
+                float r = (float)rr;
+                r -= 0.01f;
+                newReviewRatings.Add(r);
+                addAllRatings += r;
+            }
+            reviewRatings = newReviewRatings;
+
+            float reviewRatingsCount = reviewRatings.Count;
+
+            float newRatings = addAllRatings / reviewRatingsCount;
+
+            if (newRatings <= 0f)
+            {
+                newRatings = 0f;
+            }
+
+            newRatings = Snapping.Snap(newRatings, 0.01f);
+
+            ratings = newRatings;
+            UpdateRatingsUI();
+            CheckFailed();
+            currentSecondsToMinusRating = 0f;
+        }
+
+        CheckWarning();
+    }
+
+    private void CheckWarning()
+    {
+        if (ratings <= 1f)
+        {
+            ratingsTextComponent.color = Color.red;
+            warningSource.mute = false;
+        } else
+        {
+            ratingsTextComponent.color = Color.white;
+            warningSource.mute = true;
+        }
     }
 
     private Vector3 GetTooltipPos()
@@ -269,36 +377,55 @@ public class Game : MonoBehaviour
         }
     }
 
+    private void CheckBGM()
+    {
+        bool isPlayingBGM = bgmSource.isPlaying;
+        if (!isPlayingBGM)
+        {
+            int currentSong = mainScript.currentSong;
+            mainScript.currentSong = (currentSong + 1) % 2;
+            AudioClip newBGM = bgm1;
+
+            if (currentSong == 0)
+            {
+                newBGM = bgm2;
+            }
+
+            bgmSource.clip = newBGM;
+            bgmSource.Play();
+        }
+    }
+
 
     public void TableClicked()
     {
         // no pizza on the table and no other pizza is selected.
         if (!isPizzaOnTable && pizzaSelected == "")
         {
+            PlayPlacePizzaDown();
             // add pizza dough
-            print("is clicking though");
             isPizzaOnTable = true;
             Quaternion rot = new Quaternion(0f, 0f, 0f, 0f);
             GameObject newPizza = Instantiate(PizzaObj, pizzaOnTablePos, rot, GameContainer.transform);
             newPizza.name = RandomName("pizza");
             Pizza pizzaScript = newPizza.GetComponent<Pizza>();
-            pizzaScript.theParent = this;
+            pizzaScript.game = this;
             // minus dough price
-            /*float doughPrice = 0f;
+            float doughPrice = 0f;
             mainScript.prices.TryGetValue("dough", out doughPrice);
-            UpdateMoney(doughPrice);*/
+            UpdateMoney(doughPrice);
             UnselectedEverything();
         }
         else if (!isPizzaOnTable && pizzaSelected != "")
         {
+            PlayPlacePizzaDown();
             // place selected pizza on table
             isPizzaOnTable = true;
             Transform pizzaSelectedObj = GameContainer.transform.Find(pizzaSelected);
-            oven1Pizza = pizzaSelectedObj.position == pizzaInOven1Pos ? "" : oven1Pizza;
-            oven2Pizza = pizzaSelectedObj.position == pizzaInOven2Pos ? "" : oven2Pizza;
+            oven1Pizza = (pizzaSelectedObj.position == pizzaInOven1Pos) ? "" : oven1Pizza;
+            oven2Pizza = (pizzaSelectedObj.position == pizzaInOven2Pos) ? "" : oven2Pizza;
             pizzaSelectedObj.position = pizzaOnTablePos;
             Pizza pizzaSelectedScript = pizzaSelectedObj.GetComponent<Pizza>();
-            string pizzaState = pizzaSelectedScript.currentState;
             pizzaSelectedScript.isOnTable = true;
             UnselectedEverything();
         }
@@ -316,37 +443,41 @@ public class Game : MonoBehaviour
         bool isCurrentPizzaOnTable = pizzaSelectedScript.isOnTable;
         if (pizzaSelected != theName && foodSelected == "" && !pizzaCutterSelected)
         {
-            // if food NOT select & pizza does NOT equal theName.
+            // if food NOT selected & pizza cutters NOT selected & pizza does NOT equal theName.
             // Select pizza
             UnselectedEverything();
             SelectPizza(theName);
         }
         else if (foodSelected != "" && pizzaSelectedState == "raw" && isCurrentPizzaOnTable)
         {
-            /*// minus price
+            // minus price
             float foodPrice = 0f;
             mainScript.prices.TryGetValue(foodSelected, out foodPrice);
             float fixFoodPrice = Mathf.Round(foodPrice * 100) / 100;
-            UpdateMoney(foodPrice);*/
+            UpdateMoney(foodPrice);
             // if food is selected and clicked on pizza
             // Place cheese / sauce / topping
             if (foodSelected == "cheese")
             {
+                PlayCheeseSFX();
                 pizzaSelectedScript.ShowCheese();
                 UnselectedEverything();
             }
             else if (foodSelected == "sauce")
             {
+                PlaySauceSFX();
                 pizzaSelectedScript.ShowSauce();
                 UnselectedEverything();
             }
             else
             {
+                PlayToppingSFX();
                 pizzaSelectedScript.PlaceTopping(foodSelected);
             }
         }
         else if (pizzaCutterSelected && pizzaSelectedState == "cooked" && !isPizzaCut && isCurrentPizzaOnTable)
         {
+            PlayCutPizzaSFX();
             pizzaSelectedScript.CutPizza();
             UnselectedEverything();
         }
@@ -358,6 +489,7 @@ public class Game : MonoBehaviour
 
     private void SelectPizza(string theName)
     {
+        PlaySelectedSFX();
         pizzaSelected = theName;
         Pizza pizzaSelectedScript = GameContainer.transform.Find(pizzaSelected).GetComponent<Pizza>();
         pizzaSelectedScript.isSelected = true;
@@ -369,10 +501,12 @@ public class Game : MonoBehaviour
     {
         if (foodSelected == theName)
         {
+            PlayClosedSFX();
             UnselectedEverything();
         }
         else
         {
+            PlaySelectedSFX();
             UnselectedEverything();
             foodSelected = theName;
             string foodSelectedContainer = foodSelected + "_container";
@@ -404,6 +538,8 @@ public class Game : MonoBehaviour
                 pizzaSelectedScript.EnableClickArea(false);
 
                 isPizzaOnTable = false;
+
+                PlayPlacePizzaDown();
             }
             UnselectedEverything();
         }
@@ -423,6 +559,7 @@ public class Game : MonoBehaviour
 
                 Vector3 ovenTimerPos = ovenName == "oven1" ? Oven1TimerPos : Oven2TimerPos;
                 CreateOvenTimer(ovenName, ovenTimerPos, YellowTimer, GreenTimer, "OvenTimerTimeOut");
+                PlayClosedSFX();
             }
             else if (pizzaState != "raw" && canClickDoors && isCooking)
             {
@@ -439,6 +576,7 @@ public class Game : MonoBehaviour
                 {
                     currentOvenTimer.StopAndDestroy();
                 }
+                PlaySelectedSFX();
             }
         }
         else
@@ -451,7 +589,7 @@ public class Game : MonoBehaviour
     {
         GameObject newTimer = Instantiate(TimerUIObj, canvas.transform);
         TimerUI timerScript = newTimer.GetComponent<TimerUI>();
-        timerScript.theParent = this;
+        timerScript.game = this;
         newTimer.name = ovenName + "_timer";
         timerScript.callTimeoutMethodName = timeOutMethodName;
         timerScript.SetPositionAndSize(ovenTimerPos, OvenTimerSize);
@@ -490,10 +628,12 @@ public class Game : MonoBehaviour
     {
         if (pizzaCutterSelected)
         {
+            PlayClosedSFX();
             UnselectedEverything();
         }
         else
         {
+            PlaySelectedSFX();
             UnselectedEverything();
             pizzaCutterSelected = true;
             pizzaCutters.isSelected = true;
@@ -503,6 +643,7 @@ public class Game : MonoBehaviour
 
     public void TicketClicked(string theName)
     {
+        PlaySelectedSFX();
         Ticket currentTicket = GameContainer.transform.Find(theName).GetComponent<Ticket>();
         ArrayList ticketOrder = currentTicket.ticketOrder;
         int ticketNumber = currentTicket.ticketNumber;
@@ -521,16 +662,15 @@ public class Game : MonoBehaviour
             bool isPizzaCut = pizzaSelectedScript.isPizzaCut;
             if (pizzaState == "cooked" && isPizzaCut)
             {
+                PlayPlacePizzaDown();
                 // move pizza and update pizzaOnTray and start timer
+                pizzaSelectedScript.isClickable = false;
                 pizzaOnTray = pizzaSelected;
                 UnselectedEverything();
                 thePizza.position = pizzaOnTrayPos;
                 CreateServingTimer();
                 isPizzaOnTable = false;
-                //FindAndDestroyPizza();
-                /* DEBUG ONLY */
-                //thePizza.gameObject.SetActive(false); /* DEBUG ONLY */
-                /* END DEBUG ONLY */
+                FindAndDestroyPizza();
             }
         }
         else
@@ -539,18 +679,323 @@ public class Game : MonoBehaviour
         }
     }
 
+    private void FindAndDestroyPizza()
+    {
+        foreach (Transform child in GameContainer.transform)
+        {
+            string first5 = child.name.Substring(0, 5);
+
+            if (first5 == "pizza")
+            {
+                if (!child.gameObject.activeSelf)
+                {
+                    Destroy(child.gameObject);
+                }
+            }
+        }
+    }
+
     private void CreateServingTimer()
     {
         GameObject newTimer = Instantiate(BaseTimerObj);
         BaseTimer timerScript = newTimer.GetComponent<BaseTimer>();
         float rngTime = Random.Range(3f, 5f);
-        timerScript.theParent = this;
+        timerScript.game = this;
         timerScript.callTimeoutMethodName = "OnServingTrayTimeOut";
         timerScript.maxTime = rngTime;
         timerScript.timeLeft = rngTime;
         timerScript.StartTimer();
     }
 
+    public void OnServingTrayTimeOut(string servingTrayTimerName)
+    {
+        GameObject thePizza = GameContainer.transform.Find(pizzaOnTray).gameObject;
+        Pizza pizzaSelectedScript = thePizza.GetComponent<Pizza>();
+
+        ArrayList pizzaOrder = pizzaSelectedScript.CheckPizzaOrder();
+
+        CheckTicketOrder(pizzaOrder);
+        thePizza.SetActive(false);
+        pizzaOnTray = "";
+        PlayServedSFX();
+    }
+
+    private void CheckTicketOrder(ArrayList thePizzaOrder)
+    {
+        tip = MAX_TIP;
+        ticketRatings = 5.0f;
+        int ticketCount = 0;
+
+        foreach (Dictionary<string, ArrayList> ticket in tickets)
+        {
+            bool isMatching = false;
+            string ticketKey = ticket.Keys.ToArrayPooled()[0];
+            ArrayList ticketOrder = ticket[ticketKey];
+
+            if (thePizzaOrder.Count != ticketOrder.Count)
+            {
+                // count doesnt equal
+                ticketCount++;
+                continue;
+            }
+
+            if (thePizzaOrder.Count > 1)
+            {
+                if (ticketOrder[0] != thePizzaOrder[0])
+                {
+                    // if sauce and cheese are in the correct order
+                    ticketCount++;
+                    continue;
+                }
+            }
+
+            Dictionary<string, int> ticketToppings = (Dictionary<string, int>)ticketOrder[ticketOrder.Count - 1];
+            Dictionary<string, int> pizzaToppings = (Dictionary<string, int>)thePizzaOrder[thePizzaOrder.Count - 1];
+            if (ticketToppings.Count != pizzaToppings.Count)
+            {
+                ticketCount++;
+                continue;
+            }
+
+            isMatching = CheckTicketToppings(ticketKey, pizzaToppings, ticketToppings);
+
+            if (isMatching)
+            {
+                AddTicketsOrdered(ticketKey);
+                CheckHowLongPizzaTook(ticketKey);
+                RemoveTicket(ticketKey, ticketCount);
+                GetPaid();
+                GiveRating();
+                UpdatePizzaMade();
+                CheckFailed();
+                break;
+            }
+
+            ticketCount++;
+        }
+    }
+
+    private void UpdatePizzaMade()
+    {
+        string currentPizzasMade = mainScript.pizzasMade.ToString();
+
+        currentPizzasMade = (currentPizzasMade.Length == 1) ? "0" + currentPizzasMade : currentPizzasMade;
+        currentPizzasMade = (currentPizzasMade.Length == 2) ? "0" + currentPizzasMade : currentPizzasMade;
+
+        pizzaMadeText.text = currentPizzasMade;
+    }
+
+    private bool CheckTicketToppings(string ticketKey, Dictionary<string, int> pizzaToppings, Dictionary<string, int> ticketToppings)
+    {
+        foreach (string tt in ticketToppings.Keys)
+        {
+            if (pizzaToppings.ContainsKey(tt))
+            {
+                // check amount
+                int ticketAmount = ticketToppings[tt];
+                int maxAmount = ticketAmount * MAX_TOPPING_MULTIPLIER;
+                int pizzaAmount = pizzaToppings[tt];
+                if (pizzaAmount < ticketAmount)
+                {
+                    float tipRateAffected = pizzaAmount / ticketAmount;
+                    tip *= tipRateAffected;
+                    ticketRatings *= tipRateAffected;
+                    ticketRatings -= 1.0f - tipRateAffected;
+                }
+                else if (pizzaAmount > maxAmount)
+                {
+                    float tipRateAffected = maxAmount / pizzaAmount;
+                    tip *= tipRateAffected;
+                    ticketRatings *= tipRateAffected;
+                    ticketRatings -= 1.0f - tipRateAffected;
+                }
+            }
+            else
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+
+    private void AddTicketsOrdered(string theTicketName)
+    {
+        string baseName = string.Empty;
+        foreach (char c in theTicketName)
+        {
+            if (!char.IsDigit(c))
+            {
+                baseName += c.ToString();
+            }
+        }
+        mainScript.AddTicketOrderValue(baseName);
+    }
+
+
+    private void CheckHowLongPizzaTook(string ticketKey)
+    {
+        string timerName = ticketKey + "-timer";
+        bool isInTicketTimerEnded = ticketTimerEnded.Contains(timerName);
+
+        TimerUI ticketTimer = canvas.transform.Find(timerName).GetComponent<TimerUI>();
+        float timeLeft = ticketTimer.timeLeft;
+
+        float amountLeft = timeLeft / ticketWaitTime;
+
+        if (ticketRatings > 0.0f && !isInTicketTimerEnded)
+        {
+            float checkTimeLeft = amountLeft * 2.0f;
+            if (checkTimeLeft < 1.0f)
+            {
+                ticketRatings *= checkTimeLeft;
+            }
+        }
+
+        if (isInTicketTimerEnded)
+        {
+            ticketTimerEnded.Remove(ticketKey);
+            tip = 0f;
+            ticketRatings = 0f;
+        }
+
+        tip *= amountLeft;
+    }
+
+
+    private void RemoveTicket(string ticketKey, int ticketCount)
+    {
+        GameObject currentTicket = GameContainer.transform.Find(ticketKey).gameObject;
+        GameObject currentTicketTImer = canvas.transform.Find(ticketKey + "-timer").gameObject;
+        Destroy(currentTicket);
+        Destroy(currentTicketTImer);
+        tickets.RemoveAt(ticketCount);
+        UpdateTicketsOnTable();
+    }
+
+
+    private void GetPaid()
+    {
+        float amountPaid = PIZZA_PRICE + tip;
+        float fixAmountPaid = Snapping.Snap(amountPaid, 0.01f);
+        UpdateMoney(fixAmountPaid);
+    }
+
+    private void UpdateMoney(float moneyAmount)
+    {
+        money += moneyAmount;
+        GameObject updateMoneyText = Instantiate(UpdateMoneyTextObj, canvas.transform);
+        UpdateMoneyText updateMoneyTextScript = updateMoneyText.GetComponent<UpdateMoneyText>();
+        updateMoneyTextScript.SetupText(moneyAmount);
+        UpdateMoneyUI();
+    }
+
+    private void UpdateMoneyUI()
+    {
+        float snappedMoney = Mathf.Floor(money);
+        string moneyText = snappedMoney.ToString();
+
+        if (moneyText.Length > 6)
+        {
+            moneyText = "999999+";
+        } else
+        {
+            moneyText = "$" + moneyText;
+        }
+
+        MoneyText.GetComponent<TextMeshProUGUI>().text = moneyText;
+    }
+
+
+    private void GiveRating()
+    {
+        if (reviewRatings.Count == MAX_AMOUNT_RATINGS)
+        {
+            reviewRatings.RemoveAt(0);
+        }
+
+        if (ticketRatings < 0f)
+        {
+            ticketRatings = 0f;
+        }
+
+        reviewRatings.Add(ticketRatings);
+
+        float addAllRatings = 0.0f;
+        float reviewRatingsCount = reviewRatings.Count;
+
+        foreach (float r in reviewRatings)
+        {
+            addAllRatings += r;
+        }
+
+        float newRatings = addAllRatings / reviewRatingsCount;
+
+        float ratingDifference = newRatings - ratings;
+
+        if (newRatings <= 0f)
+        {
+            newRatings = 0f;
+        }
+
+        newRatings = Mathf.Round(newRatings * 100f) / 100f;
+
+        ratings = newRatings;
+
+        UpdateRatings(ratingDifference);
+    }
+
+    private void UpdateRatings(float ratingDifference)
+    {
+        GameObject ratingsText = Instantiate(UpdateRatingsTextObj, canvas.transform);
+        UpdateRatingText updateRatingText = ratingsText.GetComponent<UpdateRatingText>();
+
+        if (ratingDifference == 0f && ratings == 5f)
+        {
+            updateRatingText.SetupMaxText();
+        }
+        else
+        {
+            float snappedAmount = Snapping.Snap(ratingDifference, 0.01f);
+            updateRatingText.SetupText(snappedAmount);
+        }
+
+        UpdateRatingsUI();
+    }
+
+    public void UpdateRatingsUI()
+    {
+        float snappedRatings = Snapping.Snap(ratings, 0.01f);
+        string ratingText = mainScript.FixDecimal(snappedRatings.ToString());
+        TextMeshProUGUI ratingTextMesh = RatingsText.GetComponent<TextMeshProUGUI>();
+        ratingTextMesh.text = ratingText;
+    }
+
+    public virtual void CheckFailed()
+    {
+        if (ratings <= 0.0f)
+        {
+            normalCheckFailed();
+        }
+    }
+
+    public void normalCheckFailed()
+    {
+        // disable pause button
+        PlayGameOverSFX();
+        isPaused = true;
+        PauseUnpauseAllTimers(true);
+        EverythingClickable(false);
+        mainScript.profit = money;
+        mainScript.EndArcade();
+    }
+
+    public void SpawnGameOver(string nextSceneName)
+    {
+        GameObject goo = Instantiate(GameOverObj, canvas.transform);
+        GameOver gooScript = goo.GetComponent<GameOver>();
+        gooScript.gameOverScene = nextSceneName;
+    }
 
     private void UnselectedEverything()
     {
@@ -597,6 +1042,7 @@ public class Game : MonoBehaviour
     {
         if (pizzaSelected != "")
         {
+            PlayTrashSFX();
             GameObject thePizza = GameContainer.transform.Find(pizzaSelected).gameObject;
             Vector3 thePizzaPos = thePizza.transform.position;
             UnselectedEverything();
@@ -623,6 +1069,7 @@ public class Game : MonoBehaviour
 
     private void EverythingClickable(bool boolValue)
     {
+        UnselectedEverything();
         foreach (Transform child in GameContainer.transform)
         {
             BoxCollider2D bc = child.GetComponent<BoxCollider2D>();
@@ -643,7 +1090,7 @@ public class Game : MonoBehaviour
             Transform getPizza = GameContainer.transform.Find(oven1Pizza);
             Pizza getPizzaScript = getPizza.GetComponent<Pizza>();
             string pizzaState = getPizzaScript.currentState;
-            getPizza.GetComponent<CircleCollider2D>().enabled = pizzaState == "raw" ? false : boolValue;
+            getPizza.GetComponent<CircleCollider2D>().enabled = (pizzaState == "raw") ? false : boolValue;
         }
 
         if (oven2Pizza != "")
@@ -651,7 +1098,7 @@ public class Game : MonoBehaviour
             Transform getPizza = GameContainer.transform.Find(oven2Pizza);
             Pizza getPizzaScript = getPizza.GetComponent<Pizza>();
             string pizzaState = getPizzaScript.currentState;
-            getPizza.GetComponent<CircleCollider2D>().enabled = pizzaState == "raw" ? false : boolValue;
+            getPizza.GetComponent<CircleCollider2D>().enabled = (pizzaState == "raw") ? false : boolValue;
         }
     }
 
@@ -664,6 +1111,7 @@ public class Game : MonoBehaviour
 
     public void HideTicketUI()
     {
+        PlayClosedSFX();
         EverythingClickable(true);
         TicketUI TicketUIObjScript = TicketUIObj.gameObject.GetComponent<TicketUI>();
         TicketUIObjScript.ShowUI(false);
@@ -675,10 +1123,45 @@ public class Game : MonoBehaviour
         TooltipObj.SetActive(true);
         TextMeshProUGUI tooltipText = TooltipTextObj.GetComponent<TextMeshProUGUI>();
         tooltipText.text = msg;
-        float howLong = msg.Length * 3f;
+        float howLong = (msg.Length * 3f) + 3f;
         RectTransform tooltipRect = TooltipObj.GetComponent<RectTransform>();
         tooltipRect.sizeDelta = new Vector2(howLong, 6f);
         TooltipObj.transform.position = GetTooltipPos();
+    }
+
+    public void ShowPizzaTooltip(string pizzaName)
+    {
+        string msg = "Select Pizza";
+        Pizza pizzaTooltipping = GameContainer.transform.Find(pizzaName).GetComponent<Pizza>();
+        bool isRaw = (pizzaTooltipping.currentState == "raw");
+        bool isCooked = (pizzaTooltipping.currentState == "cooked");
+
+        if (pizzaSelected == pizzaName && foodSelected == "" && !pizzaCutterSelected)
+        {
+            // pizza selected is selected pizza, no topping selected, and pizza cutters not selected.
+            msg = "Unselect Pizza";
+        }
+
+        if (pizzaSelected == "" && isRaw && foodSelected != "" && !pizzaCutterSelected) 
+        {
+            // topping selected
+            msg = "Place topping";
+            if (foodSelected == "cheese")
+            {
+                msg = "Add Cheese";
+            }
+            if (foodSelected == "sauce")
+            {
+                msg = "Add Sauce";
+            }
+        }
+
+        if (pizzaSelected == "" && isCooked && foodSelected == "" && pizzaCutterSelected)
+        {
+            msg = "Cut Pizza";
+        }
+
+        ShowTooltip(msg);
     }
 
     public void ShowOvenToolTip(string ovenName)
@@ -732,9 +1215,159 @@ public class Game : MonoBehaviour
         ShowTooltip(msg);
     }
 
+    public void ShowTableTooltip()
+    {
+        if (isPizzaOnTable)
+        {
+            HideTooltip();
+            return;
+        }
+
+        string msg = "Add Pizza Dough";
+
+        if (pizzaSelected != "")
+        {
+            msg = "Place Pizza";
+        }
+
+        ShowTooltip(msg);
+    }
+
+    public void ShowServingTrayTooltip()
+    {
+        string msg = "Serving Tray";
+
+        if (pizzaSelected != "")
+        {
+            Pizza pizzaSelectedScript = GameContainer.transform.Find(pizzaSelected).GetComponent<Pizza>();
+            bool isPizzaCut = pizzaSelectedScript.isPizzaCut;
+            if (isPizzaCut)
+            {
+                msg = "Serve Pizza";
+            } else
+            {
+                msg = "You can't serve that";
+            }
+        }
+
+        ShowTooltip(msg);
+    }
+
+    public void ShowTooltipTrash()
+    {
+        string msg = "Trash";
+
+        if (pizzaSelected != "")
+        {
+            msg = "Trash Pizza?";
+        }
+
+        ShowTooltip(msg);
+    }
+
     public void HideTooltip()
     {
         isTooltipOn = false;
         TooltipObj.SetActive(false);
+    }
+
+    // Audio
+    public void PlaySelectedSFX()
+    {
+        sfxSource.pitch = 1f;
+        sfxSource.clip = selectedClip;
+        sfxSource.Play();
+    }
+
+    public void PlayClosedSFX()
+    {
+        sfxSource.pitch = 1f;
+        sfxSource.clip = closedClip;
+        sfxSource.Play();
+    }
+
+    public void PlayToppingSFX()
+    {
+        float rngPitch = Random.value;
+        float newPitch = Mathf.Lerp(0.6f,1f, rngPitch);
+        sfxSource.pitch = newPitch;
+        sfxSource.clip = toppingPlacedClip;
+        sfxSource.Play();
+    }
+
+    public void PlaySauceSFX()
+    {
+        sfxSource.pitch = 1f;
+        sfxSource.clip = saucePlacedClip;
+        sfxSource.Play();
+    }
+
+    public void PlayCheeseSFX()
+    {
+        sfxSource.pitch = 0.8f;
+        sfxSource.clip = saucePlacedClip;
+        sfxSource.Play();
+    }
+
+    public void PlayPlacePizzaDown()
+    {
+        sfxSource.pitch = 0.4f;
+        sfxSource.clip = toppingPlacedClip;
+        sfxSource.Play();
+    }
+
+    public void PlayCutPizzaSFX()
+    {
+        sfxSource.pitch = 1.5f;
+        sfxSource.clip = saucePlacedClip;
+        sfxSource.Play();
+    }
+
+    public void PlayTrashSFX()
+    {
+        sfxSource.pitch = 1f;
+        sfxSource.clip = trashClip;
+        sfxSource.Play();
+    }
+
+    public void PlayServedSFX()
+    {
+        bellSource.Play();
+    }
+
+    public void PlayGameOverSFX()
+    {
+        bgmSource.mute = true;
+        sfxSource.Stop();
+        bellSource.mute = true;
+        warningSource.mute = true;
+        ambienceSource.mute = true;
+
+        sfxSource.clip = gameoverClip;
+        sfxSource.Play();
+    }
+
+    // Pausing
+    private void PauseUnpauseAllTimers(bool boolVal)
+    {
+        IEnumerable<BaseTimer> theTimers = FindObjectsOfType<BaseTimer>();
+        foreach (BaseTimer bt in theTimers)
+        {
+            bt.isRunning = !boolVal;
+        }
+        IEnumerable<Arcade_Timer> arcadeTimer = FindObjectsOfType<Arcade_Timer>();
+        foreach (Arcade_Timer arctimer in arcadeTimer)
+        {
+            arctimer.canRun = !boolVal;
+        }
+    }
+
+    public virtual void PauseGame()
+    {
+        HideTooltip();
+        isPaused = !isPaused;
+        EverythingClickable(!isPaused);
+        PauseUnpauseAllTimers(isPaused);
+        OptionMenu.SetActive(isPaused);
     }
 }

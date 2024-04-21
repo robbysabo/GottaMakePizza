@@ -4,29 +4,29 @@ using UnityEngine;
 
 public class ServingTray : MonoBehaviour
 {
-    public Game theParent;
+    public Game game;
     public bool isClickable = true;
 
     private void OnMouseDown()
     {
         if (isClickable)
         {
-            theParent.ServingTrayClicked();
+            game.ServingTrayClicked();
         }
     }
 
-    /*private void OnMouseOver()
+    private void OnMouseOver()
     {
         if (isClickable)
         {
-            theParent.ShowServingTrayTooltip();
+            game.ShowServingTrayTooltip();
         }
     }
 
     private void OnMouseExit()
     {
-        theParent.HideTooltip();
-    }*/
+        game.HideTooltip();
+    }
 
     public void SetClickable(bool boolValue)
     {

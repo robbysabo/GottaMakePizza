@@ -2257,7 +2257,7 @@ TextureImporter:
         width: 8
         height: 8
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 1, y: 1, z: 1, w: 1}
       outline: []
       physicsShape: []
@@ -2265,6 +2265,279 @@ TextureImporter:
       bones: []
       spriteID: 4276fa069fd3b52499e37f8c9d80c5c5
       internalID: 275280585
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: loading_metal
+      rect:
+        serializedVersion: 2
+        x: 19
+        y: 406
+        width: 130
+        height: 148
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e1ffa7350074f8349856cffcc5fad60e
+      internalID: 1693518151
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bell
+      rect:
+        serializedVersion: 2
+        x: 256
+        y: 720
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1c0e898d7359ed04cb85baca1c0ee24a
+      internalID: 873618423
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: panel_blank
+      rect:
+        serializedVersion: 2
+        x: 416
+        y: 672
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 2, y: 2, z: 2, w: 2}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b5ea42e8db9d6c944bae64c95eab8b28
+      internalID: 2077330899
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: handle
+      rect:
+        serializedVersion: 2
+        x: 448
+        y: 592
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 65ffe7a963eb6ec49bedd2aba0976349
+      internalID: -73512009
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: trophy
+      rect:
+        serializedVersion: 2
+        x: 208
+        y: 672
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 31e489f5fc26ccd4988a74687ec54f76
+      internalID: -1399139590
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pizzaicon
+      rect:
+        serializedVersion: 2
+        x: 273
+        y: 673
+        width: 14
+        height: 14
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6fe8358f3c902bc4fae172e2e751cf3e
+      internalID: 1713478208
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tryagainicon
+      rect:
+        serializedVersion: 2
+        x: 241
+        y: 641
+        width: 14
+        height: 14
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 737b8fafc8831c94d9b5ab4ab819c409
+      internalID: -1118648891
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: lightfadeBG
+      rect:
+        serializedVersion: 2
+        x: 272
+        y: 608
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 3, y: 3, z: 3, w: 3}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 79035ae8dae259248bf28076d4e63fdf
+      internalID: 138202291
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: trophy_bronze
+      rect:
+        serializedVersion: 2
+        x: 151
+        y: 640
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d7df8f8e7733bb04d8f175c4ff532740
+      internalID: 22320096
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: trophy_silver
+      rect:
+        serializedVersion: 2
+        x: 170
+        y: 640
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5345f7b4a1d30154d95560a4cf8b61f1
+      internalID: -1511876234
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: trophy_gold
+      rect:
+        serializedVersion: 2
+        x: 189
+        y: 640
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 824b66e475a9f84459c80a576b120a8e
+      internalID: -1138028616
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: trophy_platinum
+      rect:
+        serializedVersion: 2
+        x: 208
+        y: 640
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 78fb9b60d498d5e4ebae007b1a3303d0
+      internalID: 1914771073
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: readmebtn
+      rect:
+        serializedVersion: 2
+        x: 384
+        y: 624
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a518d88a0b4097346ad2d2d16a536da9
+      internalID: 843669962
       vertices: []
       indices: 
       edges: []
@@ -2292,6 +2565,7 @@ TextureImporter:
       beef_container_selected: 691198672
       beef_cooked: 951206701
       beef_raw: 400800785
+      bell: 873618423
       bellpepper_burnt: 1443225416
       bellpepper_container: 336054612
       bellpepper_container_selected: -1338475798
@@ -2320,11 +2594,14 @@ TextureImporter:
       ham_container_selected: -690779373
       ham_cooked: -1020669391
       ham_raw: -1159123508
+      handle: -73512009
       hiscore: 11970585
       icon_day: 1810027206
       icon_done: -1792390308
       icon_night: -2056933661
       icon_sunset: -1116093429
+      lightfadeBG: 138202291
+      loading_metal: 1693518151
       metal_window: -32943280
       money: -1933144123
       mushroom_burnt: 1018761838
@@ -2345,6 +2622,7 @@ TextureImporter:
       oven: 1599321656
       oven_close: -948324459
       oven_open: -448494162
+      panel_blank: 2077330899
       panel_fancy: -509027625
       panel_flat: -498793019
       pause_icon: 2018753970
@@ -2364,6 +2642,8 @@ TextureImporter:
       pizza_shadow: 1656970553
       pizza_slices: 654711870
       pizza_table: -610344894
+      pizzaicon: 1713478208
+      readmebtn: 843669962
       sauce_burnt: -459869948
       sauce_container: 1117713889
       sauce_container_selected: -1067383588
@@ -2381,6 +2661,12 @@ TextureImporter:
       ticket_table: 1728801978
       ticket_ui: -1288228409
       trashcan: 129166581
+      trophy: -1399139590
+      trophy_bronze: 22320096
+      trophy_gold: -1138028616
+      trophy_platinum: 1914771073
+      trophy_silver: -1511876234
+      tryagainicon: -1118648891
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

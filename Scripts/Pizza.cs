@@ -13,7 +13,7 @@ public class Pizza : MonoBehaviour
 
     // filled in by script
     [Header("Filled in by script")]
-    public Game theParent;
+    public Game game;
     public SpriteRenderer spriteRenderer;
 
     // theParent needs to know the state
@@ -39,7 +39,7 @@ public class Pizza : MonoBehaviour
     private Vector2 minToppingSpawn = new Vector2(-0.8968046f, -0.9144961f);
     private Vector2 maxToppingSpawn = new Vector2(0.8909959f, 0.9399394f);
     private string texturePath = "Art/SpriteSheet";
-    private int currentSauceCheeseLayer = 0;
+    private int currentSauceCheeseLayer = 1;
     private ArrayList pizzaOrder = new ArrayList();
 
 
@@ -65,22 +65,22 @@ public class Pizza : MonoBehaviour
     {
         if (isClickable)
         {
-            theParent.PizzaClicked(name);
+            game.PizzaClicked(name);
         }
     }
 
-    /*private void OnMouseOver()
+    private void OnMouseOver()
     {
         if (isClickable)
         {
-            
+            game.ShowPizzaTooltip(name);
         }
     }
 
     private void OnMouseExit()
     {
-        theParent.HideTooltip();
-    }*/
+        game.HideTooltip();
+    }
 
     private void CreatePolygon()
     {
@@ -252,7 +252,9 @@ public class Pizza : MonoBehaviour
 
     public void SetClickable(bool boolValue)
     {
+        gameObject.SetActive(false);
         isClickable = boolValue;
+        gameObject.SetActive(true);
     }
 
     public ArrayList CheckPizzaOrder()

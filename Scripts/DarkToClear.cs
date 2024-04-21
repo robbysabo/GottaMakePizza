@@ -7,8 +7,6 @@ public class DarkToClear : MonoBehaviour
 {
     public Image img;
 
-    Color initColor;
-
     public float currentTime = 2f;
     public bool canRun = true;
 
@@ -17,7 +15,6 @@ public class DarkToClear : MonoBehaviour
     void Awake()
     {
         img = GetComponent<Image>();
-        initColor = img.color;
         maxTime = currentTime;
     }
 

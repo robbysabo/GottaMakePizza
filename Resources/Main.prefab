@@ -47,8 +47,25 @@ MonoBehaviour:
   isClickable: 1
   maxToppings: 10
   pizzasMade: 0
-  profit: 0
   howManyHours: 0
   howManyMinutes: 0
   howManySeconds: 0
+  profit: 0
   arcadeTime: 0
+  storyDone: 0
+  storyStarted: 0
+  storyDays: 30
+  storyMoney: -10000
+  loadingLength: 1
+  nextSceneName: Title
+  currentSong: 0
+  maxVolume: 0.5
+  musicVolume: 1
+  sfxVolume: 1
+  isNewHiscore: 0
+  arcadeHiscorePizzaMade: 100
+  arcadeHiscoreTime: 00h:05m:00s
+  storyHiscoreDays: 30
+  storyHiscoreMoney: 0
+  arcadeTrophyVisual: 0
+  storyTrophyVisual: 0

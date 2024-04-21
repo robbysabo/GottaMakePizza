@@ -5,7 +5,7 @@ using UnityEngine.UIElements;
 
 public class Ticket : MonoBehaviour
 {
-    public Game theParent;
+    public Game game;
     public ArrayList ticketOrder = new ArrayList();
     public int maxRNG = 101;
     public bool isClickable = true;
@@ -22,7 +22,7 @@ public class Ticket : MonoBehaviour
     {
         if (isClickable)
         {
-            theParent.TicketClicked(name);
+            game.TicketClicked(name);
         }
     }
 
@@ -31,19 +31,19 @@ public class Ticket : MonoBehaviour
     {
         if (isClickable)
         {
-            theParent.ShowTooltip(name);
+            game.ShowTooltip(name);
         }
     }
 
     private void OnMouseExit()
     {
-        theParent.HideTooltip();
+        game.HideTooltip();
     }
 
 
     public void StartMakingTicket()
     {
-        if (theParent == null)
+        if (game == null)
         {
             Debug.LogError("No Parent Script");
             return;

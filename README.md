@@ -44,6 +44,9 @@ After clicking the Play button in game.
 - You did it, that is how you play.
 - Repeat, until you lose all your ratings. (The Star with numbers in the top middle of the screen)
 
+Here is a helpful pic
+https://raw.githubusercontent.com/robbysabo/GottaMakePizza/main/helpfulgameinfo.png
+
 ## Authors
 
 Contributors names and contact info

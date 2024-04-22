@@ -110,7 +110,7 @@ public class Game : MonoBehaviour
     private ArrayList tickets = new ArrayList();
     private Vector3[] ticketUIPositions = new Vector3[6]; // X = -85.5
     private Vector2 ticketTimerSize = new Vector2(8f, 8f);
-    private float ticketWaitTime = 120f; // ####################################### Testing
+    private float ticketWaitTime = 150f;
     private Vector3 ticketTimerPos = new Vector3(9000f, 9000f, 0f);
 
 

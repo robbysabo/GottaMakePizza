@@ -7935,6 +7935,7 @@ MonoBehaviour:
   selectedClip: {fileID: 8300000, guid: 777f88b7e9eb6ac41bc1345be16156a8, type: 3}
   closedClip: {fileID: 8300000, guid: b050095cc7e5174418c803bd30688534, type: 3}
   trashClip: {fileID: 8300000, guid: d5d47fe8e19267a459faa3c60e7d0aa9, type: 3}
+  gameoverClip: {fileID: 8300000, guid: d04dd71a4aa60c841af4710a76bdd6d1, type: 3}
 --- !u!1 &1755197594
 GameObject:
   m_ObjectHideFlags: 0

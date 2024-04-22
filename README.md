@@ -15,8 +15,8 @@ It's a 2D fast-pace arcade style of making pizzas.
 ### Installing + Playing
 
 - [Download](bins/GottaMakePizza.zip)
-- Extract .zip of GottaMakePizza.zip
-- Double left click GottaMakePizza.exe
+- Extract .zip of "GottaMakePizza.zip"
+- Double left click "Gotta Make Pizza.exe"
 
 ## How to play
 
